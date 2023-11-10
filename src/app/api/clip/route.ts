@@ -13,17 +13,14 @@ export async function POST(req: Request) {
 
   const body = await req.json();
 
-  // remove null and undefined values
-  const cleanBody = Object.entries(body).reduce(
-    (a, [k, v]) => (v == null ? a : { ...a, [k]: v }),
-    {} as { [key: string]: any }
-  );
-
   const version =
-    '30c1d0b916a6f8efce20493f5d61ee27491ab2a60437c13c588468b9810ec23f';
-  const prediction = await replicate.predictions.create({
-    version,
-    input: cleanBody,
+    'lucataco/clip-interrogator:14d81f8a13e8ef87cc9b5eb7d03f5940fc7010e7226e93af612c5f0f4df1a35f';
+  const prediction = await replicate.run(version, {
+    input: {
+      mode: 'fast',
+      image: body.image,
+      clip_model_name: 'ViT-bigG-14/laion2b_s39b_b160k',
+    },
   });
 
   return new Response(JSON.stringify(prediction), {

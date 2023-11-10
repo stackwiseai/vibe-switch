@@ -62,12 +62,28 @@ export default function Home() {
     const myEvents = [...events, { prompt }];
     setEvents(myEvents);
 
+    const clipResponse = await fetch('/api/clip', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ image: lastImage }),
+    });
+
+    let clip = await clipResponse.json();
+
+    if (clipResponse.status !== 201) {
+      setError(clip.detail);
+      return;
+    }
+
+    console.log(clip);
+
+    // TODO: switch this to make it work better
     const body = {
-      prompt,
+      prompt: prompt + clip,
       image: lastImage,
     };
-
-    console.log('body', body);
 
     const response = await fetch('/api/predictions', {
       method: 'POST',
