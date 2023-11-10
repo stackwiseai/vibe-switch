@@ -1,5 +1,4 @@
 import packageData from '../../../../package.json';
-import type { NextApiRequest, NextApiResponse } from 'next';
 import Replicate from 'replicate';
 
 const replicate = new Replicate({
@@ -7,18 +6,17 @@ const replicate = new Replicate({
   userAgent: `${packageData.name}/${packageData.version}`,
 });
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export async function POST(req: Request) {
   if (!process.env.REPLICATE_API_TOKEN) {
     throw new Error(
       'The REPLICATE_API_TOKEN environment variable is not set. See README.md for instructions on how to set it.'
     );
   }
 
+  const body = await req.json();
+
   // remove null and undefined values
-  req.body = Object.entries(req.body).reduce(
+  const cleanBody = Object.entries(body).reduce(
     (a, [k, v]) => (v == null ? a : { ...a, [k]: v }),
     {} as { [key: string]: any }
   );
@@ -30,7 +28,7 @@ export default async function handler(
       'replicate',
       'paint-by-text',
       {
-        input: req.body,
+        input: cleanBody,
       }
     );
   } else {
@@ -39,19 +37,18 @@ export default async function handler(
       '30c1d0b916a6f8efce20493f5d61ee27491ab2a60437c13c588468b9810ec23f';
     prediction = await replicate.predictions.create({
       version,
-      input: req.body,
+      input: cleanBody,
     });
   }
 
   console.log({ prediction });
 
-  res.status(201).json(prediction);
+  return new Response(JSON.stringify(prediction), {
+    status: 201,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 }
 
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-  },
-};
+export const runtime = 'edge';

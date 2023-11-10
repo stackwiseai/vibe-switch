@@ -1,4 +1,4 @@
-interface Seed {
+export interface Seed {
   image: string;
   prompt: string;
 }

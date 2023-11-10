@@ -1,13 +1,13 @@
 import React from 'react';
 import Dropzone from './dropzone';
 import { FaCode, FaInfoCircle, FaDownload } from 'react-icons/fa';
-import { AiOutlineCloseCircle as StartOverIcon } from 'react-icons/ai';
+import { AiOutlineCloseCircle } from 'react-icons/ai';
 import Link from 'next/link';
 
 // Define the types for the props that the component accepts
 interface FooterProps {
   events: { image?: string }[]; // This assumes that events is an array of objects that may have an image property
-  startOver: () => void;
+  startOver: (e: any) => Promise<void>;
   handleImageDropped: (file: File) => void;
 }
 
@@ -20,15 +20,13 @@ const Footer: React.FC<FooterProps> = ({
     <footer className="w-full my-8">
       <div className="text-center">
         <Link href="/about" className="lil-button">
-          <a>
-            <FaInfoCircle className="icon" />
-            What is this?
-          </a>
+          <FaInfoCircle className="icon" />
+          What is this?
         </Link>
 
         {events.length > 1 && (
           <button className="lil-button" onClick={startOver}>
-            <StartOverIcon className="icon" />
+            <AiOutlineCloseCircle className="icon" />
             Start over
           </button>
         )}
@@ -36,22 +34,25 @@ const Footer: React.FC<FooterProps> = ({
         <Dropzone onImageDropped={handleImageDropped} />
 
         {events.length > 2 && events.some((ev) => ev.image) && (
-          <Link href={events.findLast((ev) => ev.image)?.image || ''} passHref>
-            <a className="lil-button" target="_blank" rel="noopener noreferrer">
-              <FaDownload className="icon" />
-              Download image
-            </a>
+          <Link
+            className="lil-button"
+            target="_blank"
+            rel="noopener noreferrer"
+            href={events.findLast((ev) => ev.image)?.image || ''}
+          >
+            <FaDownload className="icon" />
+            Download image
           </Link>
         )}
 
         <Link
           href="https://github.com/replicate/instruct-pix2pix-demo"
-          passHref
+          className="lil-button"
+          target="_blank"
+          rel="noopener noreferrer"
         >
-          <a className="lil-button" target="_blank" rel="noopener noreferrer">
-            <FaCode className="icon" />
-            Fork repo
-          </a>
+          <FaCode className="icon" />
+          Fork repo
         </Link>
       </div>
 
@@ -61,9 +62,9 @@ const Footer: React.FC<FooterProps> = ({
           the{' '}
           <Link
             href="https://github.com/replicate/paint-with-words#readme"
-            passHref
+            target="_blank"
           >
-            <a target="_blank">README</a>
+            README
           </Link>
           .
         </div>
@@ -71,26 +72,29 @@ const Footer: React.FC<FooterProps> = ({
 
       <div className="text-center lil-text mt-8">
         Powered by{' '}
-        <Link href="https://www.timothybrooks.com/instruct-pix2pix/" passHref>
-          <a target="_blank">InstructPix2Pix</a>
+        <Link
+          target="_blank"
+          href="https://www.timothybrooks.com/instruct-pix2pix/"
+        >
+          InstructPix2Pix
         </Link>
         ,{' '}
         <Link
           href="https://replicate.com/timothybrooks/instruct-pix2pix?utm_source=project&utm_campaign=paintbytext"
-          passHref
+          target="_blank"
         >
-          <a target="_blank">Replicate</a>
+          Replicate
         </Link>
         ,{' '}
-        <Link href="https://vercel.com/templates/ai" passHref>
-          <a target="_blank">Vercel</a>
+        <Link href="https://vercel.com/templates/ai" target="_blank">
+          Vercel
         </Link>
         , and{' '}
         <Link
           href="https://github.com/replicate/instruct-pix2pix-demo"
-          passHref
+          target="_blank"
         >
-          <a target="_blank">GitHub</a>
+          GitHub
         </Link>
       </div>
     </footer>

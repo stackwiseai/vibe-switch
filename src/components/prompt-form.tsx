@@ -5,7 +5,7 @@ import Message from './message';
 interface PromptFormProps {
   initialPrompt: string;
   isFirstPrompt: boolean;
-  onSubmit: (e: FormEvent) => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
   disabled?: boolean;
 }
 

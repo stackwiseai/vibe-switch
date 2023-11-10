@@ -1,49 +1,64 @@
-import Messages from 'components/messages';
-import PromptForm from 'components/prompt-form';
+'use client';
+import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
-import { useEffect, useState } from 'react';
+import Messages from '@/components/messages';
+import PromptForm from '@/components/prompt-form';
+import Footer from '@/components/footer';
 
-import Footer from 'components/footer';
+import prepareImageFileForUpload from '@/lib/prepare-image-file-for-upload';
+import { getRandomSeed, Seed } from '@/lib/seeds';
+import { appName, appMetaDescription, appSubtitle } from '@/lib/constants';
 
-import prepareImageFileForUpload from 'lib/prepare-image-file-for-upload';
-import { getRandomSeed } from 'lib/seeds';
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+interface Event {
+  image?: string;
+  prompt?: string;
+}
+
+interface Prediction {
+  id: string;
+  status: string;
+  output?: string[];
+  detail?: string;
+}
 
 export default function Home() {
-  const [events, setEvents] = useState([]);
-  const [predictions, setPredictions] = useState([]);
-  const [error, setError] = useState(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [seed] = useState(getRandomSeed());
-  const [initialPrompt, setInitialPrompt] = useState(seed.prompt);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [predictions, setPredictions] = useState<Prediction[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [seed] = useState<Seed>(getRandomSeed());
+  const [initialPrompt, setInitialPrompt] = useState<string>(seed.prompt);
 
-  // set the initial image from a random seed
   useEffect(() => {
     setEvents([{ image: seed.image }]);
   }, [seed.image]);
 
-  const handleImageDropped = async (image) => {
+  const handleImageDropped = async (imageFile: File) => {
     try {
-      image = await prepareImageFileForUpload(image);
+      const imageUrl = await prepareImageFileForUpload(imageFile);
+      setEvents(events.concat([{ image: imageUrl }]));
     } catch (error) {
-      setError(error.message);
-      return;
+      setError(error instanceof Error ? error.message : String(error));
     }
-    setEvents(events.concat([{ image }]));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const prompt = e.target.prompt.value;
+    const target = e.target as typeof e.target & {
+      prompt: { value: string };
+    };
+
+    const prompt = target.prompt.value;
     const lastImage = events.findLast((ev) => ev.image)?.image;
 
     setError(null);
     setIsProcessing(true);
     setInitialPrompt('');
 
-    // make a copy so that the second call to setEvents here doesn't blow away the first. Why?
     const myEvents = [...events, { prompt }];
     setEvents(myEvents);
 
@@ -51,6 +66,8 @@ export default function Home() {
       prompt,
       image: lastImage,
     };
+
+    console.log('body', body);
 
     const response = await fetch('/api/predictions', {
       method: 'POST',
@@ -93,7 +110,7 @@ export default function Home() {
     setIsProcessing(false);
   };
 
-  const startOver = async (e) => {
+  const startOver = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setEvents(events.slice(0, 1));
     setError(null);
@@ -124,7 +141,7 @@ export default function Home() {
           events={events}
           isProcessing={isProcessing}
           onUndo={(index) => {
-            setInitialPrompt(events[index - 1].prompt);
+            setInitialPrompt(events[index - 1].prompt as string);
             setEvents(
               events.slice(0, index - 1).concat(events.slice(index + 1))
             );
