@@ -15,6 +15,8 @@ const sleep = (ms: number) =>
 interface Event {
   image?: string;
   prompt?: string;
+  ai?: string;
+  fuyu?: string;
 }
 
 interface Prediction {
@@ -33,7 +35,7 @@ export default function Home() {
   const [initialPrompt, setInitialPrompt] = useState<string>(seed.prompt);
 
   useEffect(() => {
-    setEvents([{ image: seed.image }]);
+    setEvents([{ image: seed.image }, { ai: 'What should we change?' }]);
   }, [seed.image]);
 
   const handleImageDropped = async (imageFile: File) => {
@@ -62,7 +64,7 @@ export default function Home() {
     const myEvents = [...events, { prompt }];
     setEvents(myEvents);
 
-    const clipResponse = await fetch('/api/clip', {
+    const fuyuResponse = await fetch('/api/fuyu', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -70,18 +72,35 @@ export default function Home() {
       body: JSON.stringify({ image: lastImage }),
     });
 
-    let clip = await clipResponse.json();
+    let fuyu = await fuyuResponse.json();
 
-    if (clipResponse.status !== 201) {
-      setError(clip.detail);
+    if (fuyuResponse.status !== 201) {
+      setError(fuyu.detail);
       return;
     }
 
-    console.log(clip);
+    setEvents((prevEvents) => [...prevEvents, { fuyu: fuyu }]);
 
-    // TODO: switch this to make it work better
-    const body = {
-      prompt: prompt + clip,
+    const aiResponse = await fetch('/api/openai', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ description: fuyu }),
+    });
+    let vibeString = await aiResponse.json();
+
+    if (aiResponse.status !== 201) {
+      setError(vibeString.detail);
+      return;
+    }
+
+    const [vibeResponse, transformation] = vibeString.split('Transformation:');
+
+    setEvents((prevEvents) => [...prevEvents, { ai: vibeResponse }]);
+
+    const predictionBody = {
+      prompt: vibeResponse,
       image: lastImage,
     };
 
@@ -90,7 +109,7 @@ export default function Home() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(predictionBody),
     });
     let prediction = await response.json();
 
@@ -115,11 +134,14 @@ export default function Home() {
       setPredictions(predictions.concat([prediction]));
 
       if (prediction.status === 'succeeded') {
-        setEvents(
-          myEvents.concat([
-            { image: prediction.output?.[prediction.output.length - 1] },
-          ])
-        );
+        setEvents((prevEvents) => [
+          ...prevEvents,
+          {
+            image: prediction.output?.[prediction.output.length - 1],
+          },
+          { ai: `Vibe Switch: ${transformation}` },
+          { ai: 'What should we change now?' },
+        ]);
       }
     }
 

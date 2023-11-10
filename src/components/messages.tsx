@@ -8,6 +8,8 @@ import Message from './message';
 interface Event {
   image?: string;
   prompt?: string;
+  ai?: string;
+  fuyu?: string;
 }
 
 interface MessagesProps {
@@ -34,42 +36,34 @@ const Messages: React.FC<MessagesProps> = ({
       {events.map((ev, index) => {
         if (ev.image) {
           return (
-            <React.Fragment key={'image-' + index}>
-              <Message sender="replicate" shouldFillWidth>
-                <Image
-                  alt={
-                    ev.prompt
-                      ? `The result of the prompt "${ev.prompt}" on the previous image`
-                      : 'The source image'
-                  }
-                  width="512"
-                  height="512"
-                  priority={true}
-                  className="w-full h-auto rounded-lg"
-                  src={ev.image}
-                />
+            <Message
+              key={'image-' + index}
+              sender="replicate"
+              shouldFillWidth
+              isSameSender
+            >
+              <Image
+                alt={
+                  ev.prompt
+                    ? `The result of the prompt "${ev.prompt}" on the previous image`
+                    : 'The source image'
+                }
+                width="512"
+                height="512"
+                priority={true}
+                className="w-full h-auto rounded-lg"
+                src={ev.image}
+              />
 
-                {onUndo && index > 0 && index === events.length - 1 && (
-                  <div className="mt-2 text-right">
-                    <button
-                      className="lil-button"
-                      onClick={() => onUndo(index)}
-                    >
-                      <UndoIcon className="icon" /> Undo and try a different
-                      change
-                    </button>
-                  </div>
-                )}
-              </Message>
-
-              {(isProcessing || index < events.length - 1) && (
-                <Message sender="replicate" isSameSender>
-                  {index === 0
-                    ? 'What should we change?'
-                    : 'What should we change now?'}
-                </Message>
+              {onUndo && index > 0 && index === events.length - 1 && (
+                <div className="mt-2 text-right">
+                  <button className="lil-button" onClick={() => onUndo(index)}>
+                    <UndoIcon className="icon" /> Undo and try a different
+                    change
+                  </button>
+                </div>
               )}
-            </React.Fragment>
+            </Message>
           );
         }
 
@@ -77,6 +71,22 @@ const Messages: React.FC<MessagesProps> = ({
           return (
             <Message key={'prompt-' + index} sender="user">
               {ev.prompt}
+            </Message>
+          );
+        }
+
+        if (ev.ai) {
+          return (
+            <Message key={'ai-' + index} sender="replicate" isSameSender>
+              {ev.ai}
+            </Message>
+          );
+        }
+
+        if (ev.fuyu) {
+          return (
+            <Message key={'fuyu-' + index} sender="replicate">
+              {ev.fuyu}
             </Message>
           );
         }

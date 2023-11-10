@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import Replicate from 'replicate';
 
 const replicate = new Replicate({
@@ -13,15 +15,27 @@ export async function POST(req: Request) {
 
   const body = await req.json();
 
+  const filePath = path.join(
+    process.cwd(),
+    'src',
+    'lib',
+    'prompts',
+    'fuyu.txt'
+  );
+
+  const prompt = fs.readFileSync(filePath, 'utf8');
+
   const version =
-    'lucataco/clip-interrogator:14d81f8a13e8ef87cc9b5eb7d03f5940fc7010e7226e93af612c5f0f4df1a35f';
+    'lucataco/fuyu-8b:42f23bc876570a46f5a90737086fbc4c3f79dd11753a28eaa39544dd391815e9';
   const prediction = await replicate.run(version, {
     input: {
-      mode: 'fast',
       image: body.image,
-      clip_model_name: 'ViT-bigG-14/laion2b_s39b_b160k',
+      prompt: prompt,
+      max_new_tokens: 512,
     },
   });
+
+  console.log(prediction);
 
   return new Response(JSON.stringify(prediction), {
     status: 201,
@@ -30,5 +44,3 @@ export async function POST(req: Request) {
     },
   });
 }
-
-export const runtime = 'edge';

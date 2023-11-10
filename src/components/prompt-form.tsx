@@ -33,14 +33,6 @@ const PromptForm: React.FC<PromptFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="animate-in fade-in duration-700">
-      <Message sender="replicate" isSameSender>
-        <label htmlFor="prompt-input">
-          {isFirstPrompt
-            ? 'What should we change?'
-            : 'What should we change now?'}
-        </label>
-      </Message>
-
       <div className="flex mt-8">
         <input
           id="prompt-input"
