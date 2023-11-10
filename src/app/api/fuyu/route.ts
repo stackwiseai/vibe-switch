@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import sharp from 'sharp';
 import Replicate from 'replicate';
 
 const replicate = new Replicate({
@@ -14,6 +15,24 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
+
+  let imageBase64 = body.image;
+  if (imageBase64.startsWith('data:')) {
+    // Extract the base64 part
+    imageBase64 = imageBase64.split(',')[1];
+  }
+
+  // Check and convert image to JPG if necessary
+  const imageBuffer = Buffer.from(imageBase64, 'base64');
+  const image = sharp(imageBuffer);
+  const metadata = await image.metadata();
+
+  if (metadata.format !== 'jpeg') {
+    const jpgBuffer = await image.jpeg().toBuffer();
+    body.image = `data:image/jpeg;base64,${jpgBuffer.toString('base64')}`;
+  } else {
+    body.image = `data:image/jpeg;base64,${body.image}`;
+  }
 
   const filePath = path.join(
     process.cwd(),
@@ -34,8 +53,6 @@ export async function POST(req: Request) {
       max_new_tokens: 512,
     },
   });
-
-  console.log(prediction);
 
   return new Response(JSON.stringify(prediction), {
     status: 201,

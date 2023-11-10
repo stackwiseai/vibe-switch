@@ -35,7 +35,10 @@ export default function Home() {
   const [initialPrompt, setInitialPrompt] = useState<string>(seed.prompt);
 
   useEffect(() => {
-    setEvents([{ image: seed.image }, { ai: 'What should we change?' }]);
+    setEvents([
+      { image: '/public/baby_cake.jpg' },
+      { ai: 'What should we change?' },
+    ]);
   }, [seed.image]);
 
   const handleImageDropped = async (imageFile: File) => {

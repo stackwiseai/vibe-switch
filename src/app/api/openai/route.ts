@@ -10,9 +10,6 @@ export async function POST(req: Request) {
 
   const result = await chain.invoke({ originalDescription: body.description });
 
-  console.log(result);
-  console.log(result.content);
-
   return new Response(JSON.stringify(result.content), {
     status: 201,
     headers: {
