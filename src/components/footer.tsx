@@ -46,7 +46,7 @@ const Footer: React.FC<FooterProps> = ({
         )}
 
         <Link
-          href="https://github.com/replicate/instruct-pix2pix-demo"
+          href="https://github.com/stackwiseai/vibe-switch"
           className="lil-button"
           target="_blank"
           rel="noopener noreferrer"
@@ -57,11 +57,11 @@ const Footer: React.FC<FooterProps> = ({
       </div>
 
       <div className="text-center lil-text mt-8">
-        <div className="inline-block py-2 px-4 border border-yellow-200 rounded-lg bg-[#fef6aa]">
-          🤔 Are you a developer and want to learn how to build this? Check out
+        <div className="inline-block py-2 px-4 rounded-lg bg-blue-200">
+          🤔 Are you a developer and want to build something similar? Check out
           the{' '}
           <Link
-            href="https://github.com/replicate/paint-with-words#readme"
+            href="https://github.com/stackwiseai/vibe-switch#readme"
             target="_blank"
           >
             README
@@ -74,9 +74,27 @@ const Footer: React.FC<FooterProps> = ({
         Powered by{' '}
         <Link
           target="_blank"
-          href="https://www.timothybrooks.com/instruct-pix2pix/"
+          href="https://www.timothybrooks.com/instruct-pix2pix?utm_source=project&utm_campaign=vibeswitch"
         >
           InstructPix2Pix
+        </Link>
+        ,{' '}
+        <Link
+          target="_blank"
+          href="https://replicate.com/lucataco/fuyu-8b?utm_source=project&utm_campaign=vibeswitch"
+        >
+          Fuyu (Adept)
+        </Link>
+        ,{' '}
+        <Link target="_blank" href="https://openai.com/api/">
+          OpenAI
+        </Link>
+        ,{' '}
+        <Link
+          target="_blank"
+          href="https://js.langchain.com/docs/get_started/installation"
+        >
+          Langchain
         </Link>
         ,{' '}
         <Link
@@ -90,10 +108,7 @@ const Footer: React.FC<FooterProps> = ({
           Vercel
         </Link>
         , and{' '}
-        <Link
-          href="https://github.com/replicate/instruct-pix2pix-demo"
-          target="_blank"
-        >
+        <Link href="https://github.com/stackwiseai/vibe-switch" target="_blank">
           GitHub
         </Link>
       </div>

@@ -5,7 +5,7 @@ export interface Seed {
 
 const seeds: Seed[] = [
   {
-    image: '/public/baby_cake.jpg',
+    image: '/baby_cake.jpg',
     prompt: 'make his jacket out of leather',
   },
   // {
@@ -14,7 +14,7 @@ const seeds: Seed[] = [
   //   prompt: "what would it look like if it were snowing?",
   // },
   {
-    image: '/public/eiffel.jpg',
+    image: '/eiffel.jpg',
     prompt: 'add fireworks to the sky',
   },
 ];

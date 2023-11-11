@@ -5,25 +5,18 @@ import Message from './message';
 interface PromptFormProps {
   initialPrompt: string;
   isFirstPrompt: boolean;
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
+  onSubmit: (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => Promise<void>;
   disabled?: boolean;
 }
 
 const PromptForm: React.FC<PromptFormProps> = ({
-  initialPrompt,
-  isFirstPrompt,
   onSubmit,
   disabled = false,
 }) => {
-  const [prompt, setPrompt] = useState<string>(initialPrompt);
-
-  useEffect(() => {
-    setPrompt(initialPrompt);
-  }, [initialPrompt]);
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
-    setPrompt('');
     onSubmit(e);
   };
 
@@ -32,9 +25,9 @@ const PromptForm: React.FC<PromptFormProps> = ({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="animate-in fade-in duration-700">
-      <div className="flex mt-8">
-        <input
+    <form className="">
+      <div className="flex ">
+        {/* <input
           id="prompt-input"
           type="text"
           name="prompt"
@@ -45,14 +38,15 @@ const PromptForm: React.FC<PromptFormProps> = ({
             disabled ? ' rounded-md' : ' rounded-l-md'
           }`}
           disabled={disabled}
-        />
+        /> */}
 
         {!disabled && (
           <button
-            className="bg-black text-white rounded-r-md text-small inline-block p-3 flex-none"
+            onClick={(e) => handleSubmit(e)}
+            className="mt-8 animate-in fade-in duration-700 bg-black mx-auto text-white rounded-md text-small inline-block p-3 flex-none"
             type="submit"
           >
-            Paint
+            Switch Vibe
           </button>
         )}
       </div>

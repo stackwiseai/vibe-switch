@@ -1,5 +1,5 @@
-export const appName = 'Paint by Text';
+export const appName = 'Vibe Switch';
 export const appSubtitle =
-  'Edit your photos using written instructions, with the help of an AI.';
+  'Transform your images mood and atmosphere with AI-guided vibe switches.';
 export const appMetaDescription =
-  'Edit your photos using written instructions, with the help of an AI.';
+  'Transform your images mood and atmosphere with AI-guided vibe switches.';

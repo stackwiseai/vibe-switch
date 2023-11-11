@@ -35,10 +35,7 @@ export default function Home() {
   const [initialPrompt, setInitialPrompt] = useState<string>(seed.prompt);
 
   useEffect(() => {
-    setEvents([
-      { image: '/public/baby_cake.jpg' },
-      { ai: 'What should we change?' },
-    ]);
+    setEvents([{ image: seed.image }]); // , { ai: 'What should we change?' }
   }, [seed.image]);
 
   const handleImageDropped = async (imageFile: File) => {
@@ -50,21 +47,14 @@ export default function Home() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const target = e.target as typeof e.target & {
-      prompt: { value: string };
-    };
-
-    const prompt = target.prompt.value;
+  const handleSubmit = async () => {
     const lastImage = events.findLast((ev) => ev.image)?.image;
 
     setError(null);
     setIsProcessing(true);
     setInitialPrompt('');
 
-    const myEvents = [...events, { prompt }];
+    const myEvents = [...events];
     setEvents(myEvents);
 
     const fuyuResponse = await fetch('/api/fuyu', {
@@ -143,7 +133,7 @@ export default function Home() {
             image: prediction.output?.[prediction.output.length - 1],
           },
           { ai: `Vibe Switch: ${transformation}` },
-          { ai: 'What should we change now?' },
+          // { ai: 'What should we change now?' },
         ]);
       }
     }

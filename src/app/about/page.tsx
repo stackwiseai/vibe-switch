@@ -2,25 +2,37 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { BsArrowLeftShort } from 'react-icons/bs';
 
-import appName from './page';
+import { appName } from '@/lib/constants';
 
 export default function About() {
   return (
     <div>
       <Head>
-        <title>{appName as unknown as string}</title>
+        <title>{appName}</title>
       </Head>
 
       <main className="container max-w-[600px] mx-auto p-5">
-        <h1 className="text-center text-5xl font-bold m-6">
-          {appName as unknown as string}
-        </h1>
+        <h1 className="text-center text-5xl font-bold m-6">{appName}</h1>
 
         <p className="prose">
-          This open-source website provides a simple interface for modifying
-          images using text-based instructions. You can upload an image, provide
-          a text prompt describing how to change that image, and generate new
-          images based on the prompt.
+          Vibe Switch is an open-source website offering a unique way to alter
+          images through text descriptions. Simply upload a photo, click `Vibe
+          Switch`, and the AI will create a new image reflecting those
+          adjustments. This tool is perfect for creatively transforming the
+          atmosphere or mood of your pictures, using straightforward text-based
+          commands.
+        </p>
+
+        <p className="prose">
+          The image descriptions are powered by{' '}
+          <Link href="https://www.adept.ai/blog/fuyu-8b">Fuyu</Link>, a cutting
+          edge open-source machine learning model from Adept.
+        </p>
+
+        <p className="prose">
+          The Vibe Switch requests are powered by{' '}
+          <Link href="https://openai.com/">OpenAI</Link>, a cutting edge machine
+          learning language model.
         </p>
 
         <p className="prose">
@@ -44,19 +56,19 @@ export default function About() {
         </p>
 
         <p className="prose">
-          The model is hosted on{' '}
-          <Link href="https://replicate.com/timothybrooks/instruct-pix2pix?utm_source=project&utm_campaign=paintbytext">
-            Replicate
+          The image models are hosted on Replicate;{' '}
+          <Link href="https://replicate.com/timothybrooks/instruct-pix2pix?utm_source=project&utm_campaign=vibeswitch">
+            InstructPix2Pix,{' '}
+          </Link>
+          <Link href="https://replicate.com/lucataco/fuyu-8b?utm_source=project&utm_campaign=vibeswitch">
+            Fuyu
           </Link>
           , which exposes a cloud API for running predictions. This website is
-          built with Next.js and hosted on
-          <Link href="https://vercel.com/templates/ai">Vercel</Link>, and uses
-          Replicate&apos;s API to run the InstructPix2Pix model. The source code
-          is publicly available on{' '}
-          <Link href="https://github.com/replicate/instruct-pix2pix-demo">
-            GitHub
-          </Link>
-          . Pull requests welcome!
+          built with Next.js and hosted on{' '}
+          <Link href="https://vercel.com/templates/ai">Vercel</Link>. The source
+          code is publicly available on{' '}
+          <Link href="https://github.com/stackwiseai/vibe-switch">GitHub</Link>.
+          Pull requests welcome!
         </p>
 
         <div className="text-center mt-10">
@@ -65,7 +77,7 @@ export default function About() {
             className="bg-black text-white rounded-md text-small inline-block p-3 flex-none"
           >
             <BsArrowLeftShort className="icon" />
-            Back to painting
+            Back to modifying vibes
           </Link>
         </div>
       </main>
