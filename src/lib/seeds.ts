@@ -4,10 +4,6 @@ export interface Seed {
 
 const seeds: Seed[] = [
   {
-    image:
-      'https://user-images.githubusercontent.com/2289/215241066-654c5acf-8293-4fb1-a85d-c87a0297a30b.jpg',
-  },
-  {
     image: '/eiffel.jpg',
   },
 ];

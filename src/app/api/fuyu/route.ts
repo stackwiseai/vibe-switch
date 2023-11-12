@@ -55,8 +55,9 @@ export async function POST(req: Request) {
   const prompt = fs.readFileSync(filePath, 'utf8');
 
   const version =
-    'lucataco/fuyu-8b:42f23bc876570a46f5a90737086fbc4c3f79dd11753a28eaa39544dd391815e9';
-  const prediction = await replicate.run(version, {
+    '42f23bc876570a46f5a90737086fbc4c3f79dd11753a28eaa39544dd391815e9';
+  const prediction = await replicate.predictions.create({
+    version,
     input: {
       image: body.image,
       prompt: prompt,

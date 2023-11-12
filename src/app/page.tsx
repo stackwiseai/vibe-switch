@@ -7,10 +7,13 @@ import Footer from '@/components/footer';
 
 import prepareImageFileForUpload from '@/lib/prepare-image-file-for-upload';
 import { getRandomSeed, Seed, convertImageToBase64 } from '@/lib/seeds';
-import { appName, appMetaDescription, appSubtitle } from '@/lib/constants';
-
-const sleep = (ms: number) =>
-  new Promise<void>((resolve) => setTimeout(resolve, ms));
+import {
+  appName,
+  appMetaDescription,
+  appSubtitle,
+  sleep,
+  pollStatus,
+} from '@/lib/constants';
 
 interface Event {
   image?: string;
@@ -28,7 +31,8 @@ export interface Prediction {
 
 export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
-  const [predictions, setPredictions] = useState<Prediction[]>([]);
+  const [imagePredictions, setImagePredictions] = useState<Prediction[]>([]);
+  const [fuyuPredictions, setFuyuPredictions] = useState<Prediction[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [seed] = useState<Seed>(getRandomSeed());
@@ -72,14 +76,21 @@ export default function Home() {
       body: JSON.stringify({ image: base64Image }),
     });
 
-    let fuyu = await fuyuResponse.json();
+    let fuyuData = await fuyuResponse.json();
 
     if (fuyuResponse.status !== 201) {
-      setError(fuyu.detail);
+      setError(fuyuData.detail);
       return;
     }
 
-    setEvents((prevEvents) => [...prevEvents, { fuyu: fuyu.substring(1) }]);
+    fuyuData = await pollStatus({
+      url: '/api/predictions/' + fuyuData.id,
+      setPrediction: setCurrPrediction,
+      setPredictions: setFuyuPredictions,
+      predictions: fuyuPredictions,
+    });
+
+    setEvents((prevEvents) => [...prevEvents, { fuyu: fuyuData.substring(1) }]);
     const lastVibe = events.findLast((ev) => ev.ai)?.ai;
 
     const aiResponse = await fetch('/api/openai', {
@@ -88,7 +99,7 @@ export default function Home() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        description: fuyu.substring(1),
+        description: fuyuData.substring(1),
         prevVibe: lastVibe,
       }),
     });
@@ -115,40 +126,28 @@ export default function Home() {
       },
       body: JSON.stringify(predictionBody),
     });
-    let prediction = await response.json();
+    let imageData = await response.json();
 
     if (response.status !== 201) {
-      setError(prediction.detail);
+      setError(imageData.detail);
       return;
     }
 
-    while (
-      prediction.status !== 'succeeded' &&
-      prediction.status !== 'failed'
-    ) {
-      await sleep(500);
-      const response = await fetch('/api/predictions/' + prediction.id);
-      prediction = await response.json();
-      if (response.status !== 200) {
-        setError(prediction.detail);
-        return;
-      }
+    imageData = await pollStatus({
+      url: '/api/predictions/' + fuyuData.id,
+      setPrediction: setCurrPrediction,
+      setPredictions: setImagePredictions,
+      predictions: imagePredictions,
+    });
 
-      // just for bookkeeping
-      setPredictions(predictions.concat([prediction]));
-      setCurrPrediction(prediction);
-
-      if (prediction.status === 'succeeded') {
-        setEvents((prevEvents) => [
-          ...prevEvents,
-          {
-            image: prediction.output?.[prediction.output.length - 1],
-          },
-          { ai: `Vibe Switch: ${transformation}` },
-          // { ai: 'What should we change now?' },
-        ]);
-      }
-    }
+    setEvents((prevEvents) => [
+      ...prevEvents,
+      {
+        image: imageData.output?.[imageData.output.length - 1],
+      },
+      { ai: `Vibe Switch: ${transformation}` },
+      // { ai: 'What should we change now?' },
+    ]);
 
     setIsProcessing(false);
   };
