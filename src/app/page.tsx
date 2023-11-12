@@ -90,7 +90,15 @@ export default function Home() {
       predictions: fuyuPredictions,
     });
 
-    setEvents((prevEvents) => [...prevEvents, { fuyu: fuyuData.substring(1) }]);
+    if (fuyuData.status == 'failed') {
+      setError(`Replicate error with Fuyu model: ${fuyuData.error}`);
+      throw new Error(fuyuData.error);
+    }
+
+    setEvents((prevEvents) => [
+      ...prevEvents,
+      { fuyu: fuyuData.output.substring(1) },
+    ]);
     const lastVibe = events.findLast((ev) => ev.ai)?.ai;
 
     const aiResponse = await fetch('/api/openai', {
@@ -99,7 +107,7 @@ export default function Home() {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        description: fuyuData.substring(1),
+        description: fuyuData.output.substring(1),
         prevVibe: lastVibe,
       }),
     });
@@ -126,6 +134,7 @@ export default function Home() {
       },
       body: JSON.stringify(predictionBody),
     });
+
     let imageData = await response.json();
 
     if (response.status !== 201) {
@@ -134,11 +143,18 @@ export default function Home() {
     }
 
     imageData = await pollStatus({
-      url: '/api/predictions/' + fuyuData.id,
+      url: '/api/predictions/' + imageData.id,
       setPrediction: setCurrPrediction,
       setPredictions: setImagePredictions,
       predictions: imagePredictions,
     });
+
+    if (imageData.status == 'failed') {
+      setError(
+        `Replicate error with InstructPix2Pix model: ${imageData.error}`
+      );
+      throw new Error(imageData.error);
+    }
 
     setEvents((prevEvents) => [
       ...prevEvents,
