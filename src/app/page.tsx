@@ -6,7 +6,7 @@ import PromptForm from '@/components/prompt-form';
 import Footer from '@/components/footer';
 
 import prepareImageFileForUpload from '@/lib/prepare-image-file-for-upload';
-import { getRandomSeed, Seed } from '@/lib/seeds';
+import { getRandomSeed, Seed, convertImageToBase64 } from '@/lib/seeds';
 import { appName, appMetaDescription, appSubtitle } from '@/lib/constants';
 
 const sleep = (ms: number) =>
@@ -19,7 +19,7 @@ interface Event {
   fuyu?: string;
 }
 
-interface Prediction {
+export interface Prediction {
   id: string;
   status: string;
   output?: string[];
@@ -32,7 +32,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [seed] = useState<Seed>(getRandomSeed());
-  const [initialPrompt, setInitialPrompt] = useState<string>(seed.prompt);
+  const [currPrediction, setCurrPrediction] = useState<Prediction | null>(null);
 
   useEffect(() => {
     setEvents([{ image: seed.image }]); // , { ai: 'What should we change?' }
@@ -50,19 +50,26 @@ export default function Home() {
   const handleSubmit = async () => {
     const lastImage = events.findLast((ev) => ev.image)?.image;
 
+    if (!lastImage) {
+      setError('No image to process');
+      setIsProcessing(false);
+      return;
+    }
+
     setError(null);
     setIsProcessing(true);
-    setInitialPrompt('');
 
     const myEvents = [...events];
     setEvents(myEvents);
+
+    const base64Image = await convertImageToBase64(lastImage);
 
     const fuyuResponse = await fetch('/api/fuyu', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ image: lastImage }),
+      body: JSON.stringify({ image: base64Image }),
     });
 
     let fuyu = await fuyuResponse.json();
@@ -72,14 +79,18 @@ export default function Home() {
       return;
     }
 
-    setEvents((prevEvents) => [...prevEvents, { fuyu: fuyu }]);
+    setEvents((prevEvents) => [...prevEvents, { fuyu: fuyu.substring(1) }]);
+    const lastVibe = events.findLast((ev) => ev.ai)?.ai;
 
     const aiResponse = await fetch('/api/openai', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ description: fuyu }),
+      body: JSON.stringify({
+        description: fuyu.substring(1),
+        prevVibe: lastVibe,
+      }),
     });
     let vibeString = await aiResponse.json();
 
@@ -94,7 +105,7 @@ export default function Home() {
 
     const predictionBody = {
       prompt: vibeResponse,
-      image: lastImage,
+      image: base64Image,
     };
 
     const response = await fetch('/api/predictions', {
@@ -125,6 +136,7 @@ export default function Home() {
 
       // just for bookkeeping
       setPredictions(predictions.concat([prediction]));
+      setCurrPrediction(prediction);
 
       if (prediction.status === 'succeeded') {
         setEvents((prevEvents) => [
@@ -146,7 +158,6 @@ export default function Home() {
     setEvents(events.slice(0, 1));
     setError(null);
     setIsProcessing(false);
-    setInitialPrompt(seed.prompt);
   };
 
   return (
@@ -172,15 +183,14 @@ export default function Home() {
           events={events}
           isProcessing={isProcessing}
           onUndo={(index) => {
-            setInitialPrompt(events[index - 1].prompt as string);
             setEvents(
               events.slice(0, index - 1).concat(events.slice(index + 1))
             );
           }}
+          prediction={currPrediction}
         />
 
         <PromptForm
-          initialPrompt={initialPrompt}
           isFirstPrompt={events.length === 1}
           onSubmit={handleSubmit}
           disabled={isProcessing}

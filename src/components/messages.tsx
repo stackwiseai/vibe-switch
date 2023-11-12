@@ -3,6 +3,8 @@ import { RxReload as UndoIcon } from 'react-icons/rx';
 import Image from 'next/image';
 import PulseLoader from 'react-spinners/PulseLoader';
 import Message from './message';
+import { Prediction } from '../app/page';
+import Link from 'next/link';
 
 // Define the types for the individual event objects and the props
 interface Event {
@@ -16,12 +18,14 @@ interface MessagesProps {
   events: Event[];
   isProcessing: boolean;
   onUndo?: (index: number) => void;
+  prediction: Prediction | null;
 }
 
 const Messages: React.FC<MessagesProps> = ({
   events,
   isProcessing,
   onUndo,
+  prediction,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -96,7 +100,23 @@ const Messages: React.FC<MessagesProps> = ({
 
       {isProcessing && (
         <Message sender="replicate">
-          <PulseLoader color="#999" size={7} />
+          <div className="flex flex-col justify-center items-center px-2 py-1 ">
+            <PulseLoader color="#999" size={7} />
+            {prediction && prediction.status == 'starting' ? (
+              <p className="text-center text-sm">
+                Starting replicate container, this can sometimes
+                <br /> take 3-5 min
+                <Link
+                  className="text-blue-500"
+                  href="https://replicate.com/docs/how-does-replicate-work#cold-boots"
+                >
+                  {' '}
+                  while the model boots up
+                </Link>
+                ...
+              </p>
+            ) : null}
+          </div>
         </Message>
       )}
 

@@ -16,22 +16,32 @@ export async function POST(req: Request) {
 
   const body = await req.json();
 
-  let imageBase64 = body.image;
-  if (imageBase64.startsWith('data:')) {
-    // Extract the base64 part
-    imageBase64 = imageBase64.split(',')[1];
-  }
+  try {
+    // Check if body.image is defined and is a valid data URL
+    if (
+      !body.image ||
+      typeof body.image !== 'string' ||
+      !body.image.startsWith('data:image/')
+    ) {
+      throw new Error('Invalid or missing image data');
+    }
 
-  // Check and convert image to JPG if necessary
-  const imageBuffer = Buffer.from(imageBase64, 'base64');
-  const image = sharp(imageBuffer);
-  const metadata = await image.metadata();
+    const base64Data = body.image.split(',')[1];
+    if (!base64Data) {
+      throw new Error('No base64 data found in image data URL');
+    }
+    const imageBuffer = Buffer.from(base64Data, 'base64');
 
-  if (metadata.format !== 'jpeg') {
-    const jpgBuffer = await image.jpeg().toBuffer();
-    body.image = `data:image/jpeg;base64,${jpgBuffer.toString('base64')}`;
-  } else {
-    body.image = `data:image/jpeg;base64,${body.image}`;
+    // Load the image using sharp
+    const image = sharp(imageBuffer);
+    const metadata = await image.metadata();
+
+    if (metadata.format !== 'jpeg') {
+      const jpgBuffer = await image.jpeg().toBuffer();
+      body.image = `data:image/jpeg;base64,${jpgBuffer.toString('base64')}`;
+    }
+  } catch (e) {
+    console.log(e);
   }
 
   const filePath = path.join(

@@ -3,7 +3,6 @@ import Message from './message';
 
 // Define the props that the component expects
 interface PromptFormProps {
-  initialPrompt: string;
   isFirstPrompt: boolean;
   onSubmit: (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
