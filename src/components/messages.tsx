@@ -104,7 +104,7 @@ const Messages: React.FC<MessagesProps> = ({
             <PulseLoader color="#999" size={7} />
             {prediction && prediction.status == 'starting' ? (
               <p className="text-center text-sm">
-                Starting replicate container, this can sometimes
+                Starting Replicate container, this can sometimes
                 <br /> take 3-5 min
                 <Link
                   className="text-blue-500"
