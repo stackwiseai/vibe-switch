@@ -3,9 +3,9 @@ export interface Seed {
 }
 
 const seeds: Seed[] = [
-  // {
-  //   image: '/eiffel.jpg',
-  // },
+  {
+    image: '/eiffel.jpg',
+  },
   {
     image: '/arc.jpg',
   },
