@@ -98,7 +98,7 @@ const Footer: React.FC<FooterProps> = ({
         </Link>
         ,{' '}
         <Link
-          href="https://replicate.com/timothybrooks/instruct-pix2pix?utm_source=project&utm_campaign=paintbytext"
+          href="https://replicate.com/timothybrooks/instruct-pix2pix?utm_source=project&utm_campaign=vibeswitch"
           target="_blank"
         >
           Replicate

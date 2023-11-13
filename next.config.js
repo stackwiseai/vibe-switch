@@ -26,7 +26,7 @@ const nextConfig = {
     return [
       {
         source: '/github',
-        destination: 'https://github.com/replicate/paint-by-text',
+        destination: 'https://github.com/stackwiseai/vibe-switch',
         permanent: false,
       },
       {
