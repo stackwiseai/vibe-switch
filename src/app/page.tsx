@@ -189,9 +189,9 @@ export default function Home() {
         <hgroup>
           <h1 className="text-center text-5xl font-bold m-6">{appName}</h1>
           <p className="text-center text-xl opacity-60 m-6">
-            {appSubtitle}
+            {appSubtitle}{' '}
             <Link href="https://stackwise.ai/" target="_blank">
-              A <span className="text-blue-900">Stackwise</span> app.
+              A <span className="text-blue-900">Stackwise</span> creation.
             </Link>
           </p>
         </hgroup>
