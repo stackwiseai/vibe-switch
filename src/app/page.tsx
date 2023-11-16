@@ -14,6 +14,7 @@ import {
   sleep,
   pollStatus,
 } from '@/lib/constants';
+import Link from 'next/link';
 
 interface Event {
   image?: string;
@@ -187,7 +188,12 @@ export default function Home() {
       <main className="container max-w-[700px] mx-auto p-5">
         <hgroup>
           <h1 className="text-center text-5xl font-bold m-6">{appName}</h1>
-          <p className="text-center text-xl opacity-60 m-6">{appSubtitle}</p>
+          <p className="text-center text-xl opacity-60 m-6">
+            {appSubtitle}
+            <Link href="https://stackwise.ai/" target="_blank">
+              A <span className="text-blue-900">Stackwise</span> app.
+            </Link>
+          </p>
         </hgroup>
 
         <Messages
