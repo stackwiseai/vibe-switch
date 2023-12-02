@@ -20,13 +20,12 @@ export async function POST(req: Request) {
   );
 
   const version =
-    '30c1d0b916a6f8efce20493f5d61ee27491ab2a60437c13c588468b9810ec23f';
-  const prediction = await replicate.predictions.create({
-    version,
+    'timothybrooks/instruct-pix2pix:30c1d0b916a6f8efce20493f5d61ee27491ab2a60437c13c588468b9810ec23f';
+  const prediction: any = await replicate.run(version, {
     input: cleanBody,
   });
 
-  return new Response(JSON.stringify(prediction), {
+  return new Response(JSON.stringify(prediction[0]), {
     status: 201,
     headers: {
       'Content-Type': 'application/json',

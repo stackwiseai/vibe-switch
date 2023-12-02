@@ -15,7 +15,9 @@ export function getRandomSeed(): Seed {
   return seeds[Math.floor(Math.random() * seeds.length)];
 }
 
-export async function convertImageToBase64(url: string) {
+export async function convertImageToBase64(
+  url: string
+): Promise<string | ArrayBuffer | null> {
   // Check if the URL is already a base64 string
   if (url.startsWith('data:image/')) {
     return url; // It's already a base64 string, so return as-is

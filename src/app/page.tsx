@@ -1,4 +1,5 @@
 'use client';
+import transformImageWithModel from '../../stacks/replicate/transformImageWithModel';
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Messages from '@/components/messages';
@@ -128,7 +129,7 @@ export default function Home() {
       image: base64Image,
     };
 
-    const response = await fetch('/api/predictions', {
+    const response = await fetch('/api/instruct', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -143,12 +144,7 @@ export default function Home() {
       return;
     }
 
-    imageData = await pollStatus({
-      url: '/api/predictions/' + imageData.id,
-      setPrediction: setCurrPrediction,
-      setPredictions: setImagePredictions,
-      predictions: imagePredictions,
-    });
+    console.log('imageData', imageData);
 
     if (imageData.status == 'failed') {
       setError(
@@ -157,13 +153,15 @@ export default function Home() {
       throw new Error(imageData.error);
     }
 
+    // const imageData = await transformImageWithModel(vibeResponse, base64Image);
+    // console.log('imageData', imageData);
+
     setEvents((prevEvents) => [
       ...prevEvents,
       {
-        image: imageData.output?.[imageData.output.length - 1],
+        image: imageData,
       },
       { ai: `Vibe Switch: ${transformation}` },
-      // { ai: 'What should we change now?' },
     ]);
 
     setIsProcessing(false);
