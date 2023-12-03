@@ -1,6 +1,3 @@
-import fs from 'fs';
-import path from 'path';
-import sharp from 'sharp';
 import Replicate from 'replicate';
 
 const replicate = new Replicate({
@@ -16,56 +13,42 @@ export async function POST(req: Request) {
 
   const body = await req.json();
 
-  try {
-    // Check if body.image is defined and is a valid data URL
-    if (
-      !body.image ||
-      typeof body.image !== 'string' ||
-      !body.image.startsWith('data:image/')
-    ) {
-      throw new Error('Invalid or missing image data');
-    }
-
-    const base64Data = body.image.split(',')[1];
-    if (!base64Data) {
-      throw new Error('No base64 data found in image data URL');
-    }
-    const imageBuffer = Buffer.from(base64Data, 'base64');
-
-    // Load the image using sharp
-    const image = sharp(imageBuffer);
-    const metadata = await image.metadata();
-
-    if (metadata.format !== 'jpeg') {
-      const jpgBuffer = await image.jpeg().toBuffer();
-      body.image = `data:image/jpeg;base64,${jpgBuffer.toString('base64')}`;
-    }
-  } catch (e) {
-    console.log(e);
-  }
-
-  const filePath = path.join(
-    process.cwd(),
-    'src',
-    'lib',
-    'prompts',
-    'fuyu.txt'
-  );
-
-  const prompt = fs.readFileSync(filePath, 'utf8');
-
   const version =
     '42f23bc876570a46f5a90737086fbc4c3f79dd11753a28eaa39544dd391815e9';
-  const prediction = await replicate.predictions.create({
+  const createPrediction = await replicate.predictions.create({
     version,
     input: {
       image: body.image,
-      prompt: prompt,
-      max_new_tokens: 512,
+      prompt: body.prompt,
     },
   });
 
-  return new Response(JSON.stringify(prediction), {
+  let prediction;
+
+  while (true) {
+    prediction = await fetch(
+      `https://api.replicate.com/v1/predictions/${createPrediction.id}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
+        },
+        cache: 'no-store',
+      }
+    );
+
+    const data = await prediction.json();
+    if (data.status === 'succeeded') {
+      console.log('data', data);
+      prediction = data;
+      break;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 500)); // 500ms delay between each poll
+  }
+
+  return new Response(JSON.stringify(prediction.output), {
     status: 201,
     headers: {
       'Content-Type': 'application/json',

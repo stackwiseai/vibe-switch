@@ -6,9 +6,9 @@ const seeds: Seed[] = [
   {
     image: '/eiffel.jpg',
   },
-  {
-    image: '/arc.jpg',
-  },
+  // {
+  //   image: '/arc.jpg',
+  // },
 ];
 
 export function getRandomSeed(): Seed {

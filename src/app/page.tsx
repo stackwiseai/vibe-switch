@@ -1,27 +1,26 @@
 'use client';
+import describeImageWithPrompt from '../../stacks/replicate/describeImage';
+import switchVibeWithElon from '../../stacks/openai/switchVibeWithElon';
+import textToSpeech from '../../stacks/elevenlabs/textToSpeech';
 import transformImageWithModel from '../../stacks/replicate/transformImageWithModel';
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Messages from '@/components/messages';
 import PromptForm from '@/components/prompt-form';
 import Footer from '@/components/footer';
+import { fuyuPrompt } from '@/lib/prompts/fuyu';
 
 import prepareImageFileForUpload from '@/lib/prepare-image-file-for-upload';
 import { getRandomSeed, Seed, convertImageToBase64 } from '@/lib/seeds';
-import {
-  appName,
-  appMetaDescription,
-  appSubtitle,
-  sleep,
-  pollStatus,
-} from '@/lib/constants';
+import { appName, appMetaDescription, appSubtitle } from '@/lib/constants';
+import { fewShotExamples } from '@/lib/prompts/base';
 import Link from 'next/link';
 
 interface Event {
   image?: string;
   prompt?: string;
   ai?: string;
-  fuyu?: string;
+  desc?: string;
 }
 
 export interface Prediction {
@@ -33,8 +32,6 @@ export interface Prediction {
 
 export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
-  const [imagePredictions, setImagePredictions] = useState<Prediction[]>([]);
-  const [fuyuPredictions, setFuyuPredictions] = useState<Prediction[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [seed] = useState<Seed>(getRandomSeed());
@@ -70,91 +67,29 @@ export default function Home() {
 
     const base64Image = await convertImageToBase64(lastImage);
 
-    const fuyuResponse = await fetch('/api/fuyu', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ image: base64Image }),
-    });
+    const imageDescription = await describeImageWithPrompt(
+      base64Image,
+      fuyuPrompt
+    );
 
-    let fuyuData = await fuyuResponse.json();
-
-    if (fuyuResponse.status !== 201) {
-      setError(fuyuData.detail);
-      return;
-    }
-
-    fuyuData = await pollStatus({
-      url: '/api/predictions/' + fuyuData.id,
-      setPrediction: setCurrPrediction,
-      setPredictions: setFuyuPredictions,
-      predictions: fuyuPredictions,
-    });
-
-    if (fuyuData.status == 'failed') {
-      setError(`Replicate error with Fuyu model: ${fuyuData.error}`);
-      throw new Error(fuyuData.error);
-    }
-
-    setEvents((prevEvents) => [
-      ...prevEvents,
-      { fuyu: fuyuData.output.substring(1) },
-    ]);
+    setEvents((prevEvents) => [...prevEvents, { desc: imageDescription }]);
     const lastVibe = events.findLast((ev) => ev.ai)?.ai;
 
-    const aiResponse = await fetch('/api/openai', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        description: fuyuData.output.substring(1),
-        prevVibe: lastVibe,
-      }),
-    });
-    let vibeString = await aiResponse.json();
-
-    if (aiResponse.status !== 201) {
-      setError(vibeString.detail);
-      return;
-    }
+    const vibeString = await switchVibeWithElon(
+      fewShotExamples,
+      imageDescription,
+      lastVibe
+    );
 
     const [vibeResponse, transformation] = vibeString.split('Transformation:');
 
     setEvents((prevEvents) => [...prevEvents, { ai: vibeResponse }]);
 
-    const predictionBody = {
-      prompt: vibeResponse,
-      image: base64Image,
-    };
+    const speech = await textToSpeech('aPEXVxiTAkCk4Di4NDnV', vibeResponse);
+    const audio = new Audio(speech.fileName);
+    audio.play();
 
-    const response = await fetch('/api/instruct', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(predictionBody),
-    });
-
-    let imageData = await response.json();
-
-    if (response.status !== 201) {
-      setError(imageData.detail);
-      return;
-    }
-
-    console.log('imageData', imageData);
-
-    if (imageData.status == 'failed') {
-      setError(
-        `Replicate error with InstructPix2Pix model: ${imageData.error}`
-      );
-      throw new Error(imageData.error);
-    }
-
-    // const imageData = await transformImageWithModel(vibeResponse, base64Image);
-    // console.log('imageData', imageData);
+    const imageData = await transformImageWithModel(vibeResponse, base64Image);
 
     setEvents((prevEvents) => [
       ...prevEvents,

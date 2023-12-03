@@ -11,7 +11,7 @@ interface Event {
   image?: string;
   prompt?: string;
   ai?: string;
-  fuyu?: string;
+  desc?: string;
 }
 
 interface MessagesProps {
@@ -87,10 +87,10 @@ const Messages: React.FC<MessagesProps> = ({
           );
         }
 
-        if (ev.fuyu) {
+        if (ev.desc) {
           return (
-            <Message key={'fuyu-' + index} sender="replicate">
-              {ev.fuyu}
+            <Message key={'desc-' + index} sender="replicate">
+              {ev.desc}
             </Message>
           );
         }

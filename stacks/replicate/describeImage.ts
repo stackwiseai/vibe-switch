@@ -7,11 +7,11 @@ const replicate = new Replicate({
 });
 
 /**
- * Brief: use the prompt to transform the image, choose the model
+ * Brief: find a model to get a description of the image. this description should be guided by the prompt
  */
-export default async function transformImageWithModel(
-  prompt: string,
-  image: string
+export default async function describeImageWithPrompt(
+  image: string,
+  prompt: string
 ): Promise<string> {
   if (!process.env.REPLICATE_API_TOKEN) {
     throw new Error(
@@ -20,12 +20,12 @@ export default async function transformImageWithModel(
   }
 
   const version =
-    '30c1d0b916a6f8efce20493f5d61ee27491ab2a60437c13c588468b9810ec23f';
+    '42f23bc876570a46f5a90737086fbc4c3f79dd11753a28eaa39544dd391815e9';
   const firstPrediction = await replicate.predictions.create({
     version,
     input: {
-      prompt,
       image,
+      prompt,
     },
   });
 
@@ -53,5 +53,5 @@ export default async function transformImageWithModel(
     await new Promise((resolve) => setTimeout(resolve, 500)); // 500ms delay between each poll
   }
 
-  return prediction.output[0];
+  return prediction.output;
 }
