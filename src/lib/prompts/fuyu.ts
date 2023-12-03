@@ -1,4 +1,0 @@
-export const fuyuPrompt = `Please describe what is going on in this image. 
-Then, talk about the vibe/atmosphere of the image. This means explaining things like the mood, vibrance, and color scheme. 
-Provide a two word summary for the vibe of the image.
-Be descriptive.`;

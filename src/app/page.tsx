@@ -1,14 +1,9 @@
 'use client';
-import describeImageWithPrompt from '../../stacks/replicate/describeImage';
-import switchVibeWithElon from '../../stacks/openai/switchVibeWithElon';
-import textToSpeech from '../../stacks/elevenlabs/textToSpeech';
-import transformImageWithModel from '../../stacks/replicate/transformImageWithModel';
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Messages from '@/components/messages';
 import PromptForm from '@/components/prompt-form';
 import Footer from '@/components/footer';
-import { fuyuPrompt } from '@/lib/prompts/fuyu';
 
 import prepareImageFileForUpload from '@/lib/prepare-image-file-for-upload';
 import { getRandomSeed, Seed, convertImageToBase64 } from '@/lib/seeds';
@@ -38,7 +33,7 @@ export default function Home() {
   const [currPrediction, setCurrPrediction] = useState<Prediction | null>(null);
 
   useEffect(() => {
-    setEvents([{ image: seed.image }]); // , { ai: 'What should we change?' }
+    setEvents([{ image: seed.image }]);
   }, [seed.image]);
 
   const handleImageDropped = async (imageFile: File) => {
@@ -65,39 +60,45 @@ export default function Home() {
     const myEvents = [...events];
     setEvents(myEvents);
 
-    const base64Image = await convertImageToBase64(lastImage);
+    const base64Image = (await convertImageToBase64(lastImage)) as string;
 
-    const imageDescription = await describeImageWithPrompt(
-      base64Image,
-      fuyuPrompt
-    );
+    // get the description of the image
+    const imageDescription =
+      'The Eiffel Tower on a sunny day. The vibes are immaculate, with people strolling through the park and enjoying the warmth.';
 
     setEvents((prevEvents) => [...prevEvents, { desc: imageDescription }]);
     const lastVibe = events.findLast((ev) => ev.ai)?.ai;
 
-    const vibeString = await switchVibeWithElon(
-      fewShotExamples,
-      imageDescription,
-      lastVibe
-    );
+    const aiResponse = await fetch('/api/openai', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        description: imageDescription,
+        prevVibe: lastVibe,
+      }),
+    });
+    let vibeString = await aiResponse.json();
+
+    if (aiResponse.status !== 201) {
+      setError(vibeString.detail);
+      return;
+    }
 
     const [vibeResponse, transformation] = vibeString.split('Transformation:');
 
     setEvents((prevEvents) => [...prevEvents, { ai: vibeResponse }]);
 
-    const speech = await textToSpeech('aPEXVxiTAkCk4Di4NDnV', vibeResponse);
-    const audio = new Audio(speech.fileName);
-    audio.play();
+    // const imageData =
 
-    const imageData = await transformImageWithModel(vibeResponse, base64Image);
-
-    setEvents((prevEvents) => [
-      ...prevEvents,
-      {
-        image: imageData,
-      },
-      { ai: `Vibe Switch: ${transformation}` },
-    ]);
+    // setEvents((prevEvents) => [
+    //   ...prevEvents,
+    //   {
+    //     image: imageData,
+    //   },
+    //   { ai: `Vibe Switch: ${transformation}` },
+    // ]);
 
     setIsProcessing(false);
   };
