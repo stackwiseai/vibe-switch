@@ -70,7 +70,7 @@ const Footer: React.FC<FooterProps> = ({
         </div>
       </div>
 
-      <div className="text-center lil-text mt-8">
+      {/* <div className="text-center lil-text mt-8">
         Powered by{' '}
         <Link
           target="_blank"
@@ -111,7 +111,7 @@ const Footer: React.FC<FooterProps> = ({
         <Link href="https://github.com/stackwiseai/vibe-switch" target="_blank">
           GitHub
         </Link>
-      </div>
+      </div> */}
     </footer>
   );
 };
