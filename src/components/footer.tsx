@@ -18,7 +18,7 @@ const Footer: React.FC<FooterProps> = ({
 }) => {
   return (
     <footer className="w-full my-8">
-      <div className="text-center">
+      {/* <div className="text-center">
         <Link href="/about" className="lil-button">
           <FaInfoCircle className="icon" />
           What is this?
@@ -68,7 +68,7 @@ const Footer: React.FC<FooterProps> = ({
           </Link>
           .
         </div>
-      </div>
+      </div> */}
 
       {/* <div className="text-center lil-text mt-8">
         Powered by{' '}
