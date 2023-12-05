@@ -8,8 +8,6 @@ import Footer from '@/components/footer';
 import prepareImageFileForUpload from '@/lib/prepare-image-file-for-upload';
 import { getRandomSeed, Seed, convertImageToBase64 } from '@/lib/seeds';
 import { appName, appMetaDescription, appSubtitle } from '@/lib/constants';
-import { fewShotExamples } from '@/lib/prompts/base';
-import { fuyuPrompt } from '@/lib/prompts/fuyu';
 import Link from 'next/link';
 
 interface Event {
@@ -81,14 +79,15 @@ export default function Home() {
     setEvents((prevEvents) => [...prevEvents, { desc: imageDescription }]);
 
     // get openai to generate a different vibe
-    const vibeString = ''
+    const changedVibeToElon = ''
 
-    setEvents((prevEvents) => [...prevEvents, { ai: vibeString }]);
+    setEvents((prevEvents) => [...prevEvents, { ai: changedVibeToElon }]);
+
+    // for fun, talk like Elon
+    const speech = ''
 
     // switch the picture to the different vibe
-    const imageUrl = ''
-
-
+    const newImage = ''
 
 
 
@@ -108,7 +107,7 @@ export default function Home() {
     setEvents((prevEvents) => [
       ...prevEvents,
       {
-        image: imageUrl,
+        image: newImage,
       },
     ]);
 
