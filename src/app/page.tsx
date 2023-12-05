@@ -9,6 +9,7 @@ import prepareImageFileForUpload from '@/lib/prepare-image-file-for-upload';
 import { getRandomSeed, Seed, convertImageToBase64 } from '@/lib/seeds';
 import { appName, appMetaDescription, appSubtitle } from '@/lib/constants';
 import { fewShotExamples } from '@/lib/prompts/base';
+import { fuyuPrompt } from '@/lib/prompts/fuyu';
 import Link from 'next/link';
 
 interface Event {
@@ -60,45 +61,56 @@ export default function Home() {
     const myEvents = [...events];
     setEvents(myEvents);
 
-    const base64Image = (await convertImageToBase64(lastImage)) as string;
+    const base64Image = await convertImageToBase64(lastImage);
 
-    // get the description of the image
-    const imageDescription =
-      'The Eiffel Tower on a sunny day. The vibes are immaculate, with people strolling through the park and enjoying the warmth.';
+
+
+
+
+
+
+
+
+
+
+    
+
+    // get description of the image
+    const imageDescription = ''
 
     setEvents((prevEvents) => [...prevEvents, { desc: imageDescription }]);
-    const lastVibe = events.findLast((ev) => ev.ai)?.ai;
 
-    const aiResponse = await fetch('/api/openai', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    // get openai to generate a different vibe
+    const vibeString = ''
+
+    setEvents((prevEvents) => [...prevEvents, { ai: vibeString }]);
+
+    // switch the picture to the different vibe
+    const imageUrl = ''
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    setEvents((prevEvents) => [
+      ...prevEvents,
+      {
+        image: imageUrl,
       },
-      body: JSON.stringify({
-        description: imageDescription,
-        prevVibe: lastVibe,
-      }),
-    });
-    let vibeString = await aiResponse.json();
-
-    if (aiResponse.status !== 201) {
-      setError(vibeString.detail);
-      return;
-    }
-
-    const [vibeResponse, transformation] = vibeString.split('Transformation:');
-
-    setEvents((prevEvents) => [...prevEvents, { ai: vibeResponse }]);
-
-    // const imageData =
-
-    // setEvents((prevEvents) => [
-    //   ...prevEvents,
-    //   {
-    //     image: imageData,
-    //   },
-    //   { ai: `Vibe Switch: ${transformation}` },
-    // ]);
+    ]);
 
     setIsProcessing(false);
   };
